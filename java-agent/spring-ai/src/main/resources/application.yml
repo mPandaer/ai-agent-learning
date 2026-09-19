@@ -1,0 +1,10 @@
+spring:
+  ai:
+    openai:
+      # 默认指向 OpenAI 官方，可改为任意 OpenAI 兼容接口（如 DeepSeek: https://api.deepseek.com）
+      base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+      api-key: ${OPENAI_API_KEY:your-api-key-here}
+      chat:
+        options:
+          model: ${OPENAI_MODEL:gpt-4o-mini}
+          temperature: 0.7
