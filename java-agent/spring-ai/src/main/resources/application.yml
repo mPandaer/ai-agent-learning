@@ -7,6 +7,19 @@ spring:
       chat:
         model: deepseek-flash
         reasoning-effort: none
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: always
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://server.local.com:5432/spring_ai?currentSchema=demo
+    username: postgres
+    password: lwh101807.
+
+
+
 
 
 logging:
