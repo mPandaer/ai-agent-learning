@@ -6,6 +6,7 @@ spring:
       api-key: ai-agent-learning
       chat:
         model: deepseek-flash
+        reasoning-effort: none
 
 
 logging:

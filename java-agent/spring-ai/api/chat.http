@@ -4,3 +4,7 @@ GET http://localhost:8080/model/chat/hello-llm
 
 ### 同步模型调用
 GET http://localhost:8080/model/chat/hello
+
+
+### 流式模型调用
+GET http://localhost:8080/model/chat/hello/stream
