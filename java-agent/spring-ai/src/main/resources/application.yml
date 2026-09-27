@@ -12,3 +12,4 @@ spring:
 logging:
   level:
     org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor: DEBUG
+    com.learning.agent.springai.model.chatmodel.memory.advisor.RequestSimpleLogAdvisor: DEBUG
