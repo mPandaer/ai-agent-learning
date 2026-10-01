@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 @RequestMapping("/chat/prompts")
 @RestController
@@ -45,6 +46,18 @@ public class PromptsTemplateController {
         PromptTemplate template = PromptTemplate.builder().template("你是{topic}方面的专家，吐槽一下{topic}").build();
         template.add("topic", topic);
         Message userMessage = template.createMessage();
+        return chatClient.prompt().messages(userMessage).stream().content();
+
+    }
+
+
+    @Autowired
+    private PromptTemplate roleActPromptTemplate;
+
+    @GetMapping("/userDesc")
+    public Flux<String> promptTemplateUserDesc(String userDesc, HttpServletResponse response) {
+        response.setCharacterEncoding(StandardCharsets.UTF_8);
+        Message userMessage = roleActPromptTemplate.createMessage(Map.of("userDesc", userDesc));
         return chatClient.prompt().messages(userMessage).stream().content();
 
     }
