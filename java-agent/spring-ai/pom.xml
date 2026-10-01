@@ -4,17 +4,44 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!--
+      本模块独立选择 Spring Boot 基线，不继承父仓库的 POM。
+      后续新增模块（如 spring-ai-alibaba）可以选另一条 Boot 基线，互不干扰。
+    -->
     <parent>
-        <groupId>com.learning.agent</groupId>
-        <artifactId>java-agent</artifactId>
-        <version>1.0.0</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <!-- 与 spring-ai-bom 2.0.1 期望的基线一致（其 starter 显式依赖 Boot 4.1.1） -->
+        <version>4.1.1</version>
+        <relativePath/>
     </parent>
 
+    <groupId>com.learning.agent</groupId>
     <artifactId>spring-ai</artifactId>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>spring-ai</name>
     <description>Spring AI 功能探索模块</description>
+
+    <properties>
+        <java.version>17</java.version>
+        <!-- Spring AI 版本由本模块自己决定，不受根 POM 约束 -->
+        <spring-ai.version>2.0.1</spring-ai.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring AI BOM -->
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- Spring Boot Web -->
@@ -58,15 +85,31 @@
 
     <build>
         <plugins>
+            <!-- 版本与 repackage 执行由 spring-boot-starter-parent 统一提供 -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring-boot.version}</version>
+            </plugin>
+
+            <!--
+              保险：模块自管依赖版本后，若版本调解选出了比传递依赖更低的版本，
+              这里会直接构建失败，而不是等到运行时才炸。
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.6.3</version>
                 <executions>
                     <execution>
+                        <id>enforce-dependency-convergence</id>
                         <goals>
-                            <goal>repackage</goal>
+                            <goal>enforce</goal>
                         </goals>
+                        <configuration>
+                            <rules>
+                                <requireUpperBoundDeps/>
+                            </rules>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

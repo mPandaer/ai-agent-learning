@@ -4,60 +4,23 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!--
+      纯聚合器（aggregator）。
+      刻意不提供 <parent>、不做 <dependencyManagement>：
+      每个子模块自行选择 Spring Boot 基线并 import 自己的 BOM，
+      避免根节点统一管理版本时覆盖 Spring AI Alibaba 等模块的传递依赖。
+    -->
     <groupId>com.learning.agent</groupId>
     <artifactId>java-agent</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
 
+    <name>java-agent</name>
+    <description>AI Agent 学习项目（只做聚合构建，不参与依赖管理）</description>
+
     <modules>
         <module>spring-ai</module>
+        <!-- 后续按需追加：<module>spring-ai-alibaba</module> -->
     </modules>
-
-    <name>java-agent</name>
-    <description>AI Agent 学习项目（Java 父模块）</description>
-
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-        <!-- 依赖版本 -->
-        <spring-boot.version>4.0.8</spring-boot.version>
-        <spring-ai.version>2.0.1</spring-ai.version>
-    </properties>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <parameters>true</parameters>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
-    <dependencyManagement>
-        <dependencies>
-            <!-- Spring Boot BOM -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <!-- Spring AI BOM -->
-            <dependency>
-                <groupId>org.springframework.ai</groupId>
-                <artifactId>spring-ai-bom</artifactId>
-                <version>${spring-ai.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
 </project>
