@@ -9,7 +9,14 @@ import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.client.advisor.api.CallAdvisorChain;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.Generation;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 
 @NoArgsConstructor
@@ -26,8 +33,20 @@ public class RequestSimpleLogAdvisor extends SimpleLoggerAdvisor {
 
     @Override
     protected void logRequest(ChatClientRequest request) {
-        logger.debug("========================开始========================");
+        String uuid = UUID.randomUUID().toString();
+        request.context().put("log-id", uuid);
+        logger.debug("========================请求开始{"+uuid+"}========================");
         request.prompt().getInstructions().stream().map(item -> String.format("[%s] %s", item.getMessageType(), item.getText())).forEach(logger::debug);
-        logger.debug("========================结束========================");
+        logger.debug("========================请求结束{"+uuid+"}========================");
+    }
+
+    @Override
+    protected void logResponse(ChatClientResponse chatClientResponse) {
+        String uuid = (String) chatClientResponse.context().get("log-id");
+        logger.debug("========================响应开始{"+uuid+"}========================");
+        Optional.ofNullable(chatClientResponse.chatResponse())
+                .orElse(ChatResponse.builder().generations(List.of(new Generation(AssistantMessage.builder().content("无响应内容(logger)").build()))).build())
+                .getResults().stream().map(item -> item.getOutput().getText()).forEach(logger::debug);
+        logger.debug("========================响应结束{"+uuid+"}========================");
     }
 }
