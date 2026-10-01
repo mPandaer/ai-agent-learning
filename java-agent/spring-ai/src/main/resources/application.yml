@@ -2,7 +2,7 @@ spring:
   ai:
     openai:
       # 默认指向 OpenAI 官方，可改为任意 OpenAI 兼容接口（如 DeepSeek: https://api.deepseek.com）
-      base-url: http://127.0.0.1:8317/v1
+      base-url: http://server.local.com:8317/v1
       api-key: ai-agent-learning
       chat:
         model: deepseek-flash
