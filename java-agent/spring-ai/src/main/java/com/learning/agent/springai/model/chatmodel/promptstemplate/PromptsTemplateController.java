@@ -2,7 +2,6 @@ package com.learning.agent.springai.model.chatmodel.promptstemplate;
 
 import com.learning.agent.springai.model.chatmodel.memory.advisor.RequestSimpleLogAdvisor;
 import jakarta.annotation.PostConstruct;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @RequestMapping("/chat/prompts")
@@ -41,8 +39,7 @@ public class PromptsTemplateController {
 
 
     @GetMapping("/topic")
-    public Flux<String> promptTemplateTopic(String topic, HttpServletResponse response) {
-        response.setCharacterEncoding(StandardCharsets.UTF_8);
+    public Flux<String> promptTemplateTopic(String topic) {
         PromptTemplate template = PromptTemplate.builder().template("你是{topic}方面的专家，吐槽一下{topic}").build();
         template.add("topic", topic);
         Message userMessage = template.createMessage();
@@ -55,8 +52,7 @@ public class PromptsTemplateController {
     private PromptTemplate roleActPromptTemplate;
 
     @GetMapping("/userDesc")
-    public Flux<String> promptTemplateUserDesc(String userDesc, HttpServletResponse response) {
-        response.setCharacterEncoding(StandardCharsets.UTF_8);
+    public Flux<String> promptTemplateUserDesc(String userDesc) {
         Message userMessage = roleActPromptTemplate.createMessage(Map.of("userDesc", userDesc));
         return chatClient.prompt().messages(userMessage).stream().content();
 

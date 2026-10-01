@@ -1,7 +1,6 @@
 package com.learning.agent.springai.model.chatmodel;
 
 
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
@@ -37,8 +36,7 @@ public class ChatModelController {
     }
 
     @GetMapping("/hello/stream")
-    public Flux<String> helloStream(HttpServletResponse response) {
-        response.setCharacterEncoding("UTF-8");
+    public Flux<String> helloStream() {
         UserMessage userMessage = UserMessage.builder().text("你好呀，你是谁呀？").build();
         Prompt prompt = Prompt.builder().messages(userMessage).build();
         return chatModel.stream(prompt)
@@ -47,8 +45,7 @@ public class ChatModelController {
 
 
     @GetMapping("/hello/streamv2")
-    public Flux<String> helloStreamV2(HttpServletResponse response) {
-        response.setCharacterEncoding("UTF-8");
+    public Flux<String> helloStreamV2() {
         return chatModel.stream("你好呀，你是谁呀？");
     }
 

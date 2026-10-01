@@ -1,4 +1,11 @@
 spring:
+  servlet:
+    encoding:
+      # 流式响应（text/plain、text/event-stream）默认不写 charset，
+      # force-response 会让 CharacterEncodingFilter 提前调用 response.setCharacterEncoding(UTF-8)，
+      # 容器随后写 Content-Type 时会自动补上 ;charset=UTF-8，前端才按 UTF-8 解码。
+      charset: UTF-8
+      force-response: true
   ai:
     openai:
       # 默认指向 OpenAI 官方，可改为任意 OpenAI 兼容接口（如 DeepSeek: https://api.deepseek.com）
