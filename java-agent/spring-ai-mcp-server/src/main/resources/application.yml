@@ -1,0 +1,39 @@
+server:
+  # 与 spring-ai 模块（默认 8080）错开，方便两个模块同时运行
+  port: 8081
+
+spring:
+  application:
+    name: spring-ai-mcp-server
+  ai:
+    mcp:
+      server:
+        enabled: true
+        name: spring-ai-mcp-server
+        version: 1.0.0
+        instructions: "学习用 MCP Server：提供时间/日期、四则运算工具，示例资源与提示词模板。"
+        # SYNC = 同步 API（McpSyncServer）；ASYNC = 响应式 API（McpAsyncServer）
+        type: SYNC
+        # 传输协议：
+        #   STREAMABLE  推荐，MCP 2025-03-26 起的 Streamable HTTP，端点 /mcp（默认）
+        #   SSE         旧的 HTTP+SSE 长连接，端点 /sse，消息端点 /mcp/message
+        #   STATELESS   无状态 Streamable HTTP，适合水平扩容（2.0 新增）
+        #   STDIO       标准输入输出，只在 spring-ai-starter-mcp-server 下可用
+        protocol: STREAMABLE
+        capabilities:
+          tool: true
+          resource: true
+          prompt: true
+          completion: true
+        # @McpTool / @McpResource / @McpPrompt 注解扫描（默认开启）
+        annotation-scanner:
+          enabled: true
+        streamable-http:
+          mcp-endpoint: /mcp
+        # 工具调用超时
+        request-timeout: 30s
+
+logging:
+  level:
+    io.modelcontextprotocol: INFO
+    org.springframework.ai.mcp: DEBUG
