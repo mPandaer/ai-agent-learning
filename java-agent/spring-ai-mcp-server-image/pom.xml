@@ -27,6 +27,24 @@
         <java.version>17</java.version>
         <!-- Spring AI 版本由本模块自己决定，不受根 POM 约束 -->
         <spring-ai.version>2.0.1</spring-ai.version>
+        <!--
+          MinIO Java SDK：用于把生成好的图片上传到对象存储。
+
+          刻意停在 8.5.x，不要升 9.x：okhttp 从 5.x 起改成了 Kotlin Multiplatform 工程，
+          Maven Central 上的 com.squareup.okhttp3:okhttp 只是一个几百字节的元数据空壳
+          （只含 META-INF/kotlin-project-structure-metadata.json，没有任何 .class），
+          真正的 JVM 字节码挪到了 okhttp-jvm。Gradle 会读 .module 元数据自动替换，Maven 不会，
+          于是 minio 9.x 在 Maven 下编译即报：
+            java: 无法访问 okhttp3.MediaType / 找不到 okhttp3.MediaType 的类文件
+          而 minio 8.5.x 依赖 okhttp 4.12.0（纯 JVM jar），与
+          spring-ai-openai -> openai-java-core 用的 okhttp 4.12.0 完全一致，
+          全链路只有一份 okhttp3.* / okio.*，不会出现重复类。
+
+          真要上 9.x 时的做法：显式引 com.squareup.okhttp3:okhttp-jvm，
+          并把 openai-java-core 里的 okhttp 4.12.0 排除掉，否则两个版本的 okhttp3.*
+          会同时躺在 classpath 上，谁生效取决于顺序，运行期随机炸。
+        -->
+        <minio.version>8.5.17</minio.version>
     </properties>
 
     <dependencyManagement>
@@ -38,6 +56,18 @@
                 <version>${spring-ai.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <!--
+              版本对齐：minio -> guava 33.3.1-jre 带的是 error_prone_annotations 2.28.0，
+              而 spring-ai-openai -> openai-java-core 带的是 2.33.0，
+              默认调解会选中更低的 2.28.0（maven-enforcer 的 requireUpperBoundDeps 会直接报错）。
+              这里显式抬到高版本。
+            -->
+            <dependency>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_annotations</artifactId>
+                <version>2.33.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -86,6 +116,18 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!--
+          MinIO Java SDK：生图结果的落地存储（S3 兼容协议）。
+          注意：Spring Boot 没有 MinIO 的自动装配，需要自己写 MinioClient 的 @Bean
+          （见 com.learning.agent.mcp.image.config.minio）。
+          版本停留在 8.5.17 的原因见上面 minio.version 处的注释。
+        -->
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>${minio.version}</version>
+        </dependency>
+
         <!-- Lombok：版本由 Spring Boot BOM 管理 -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -107,6 +149,29 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <!--
+              Lombok 注解处理必须显式声明。
+              JDK 23 起 javac 默认不再到 classpath 上自动发现注解处理器（JDK 21 开始告警、
+              23 起直接不跑），结果 Lombok 静默失效：@Data 不生成 getter/setter、
+              @AllArgsConstructor 不生成构造器、@Slf4j 不生成 log 字段，编译报一堆
+              “找不到符号: 变量 log / 方法 getBucketName()”。
+              用 annotationProcessorPaths 而不是 <proc>full</proc>，是为了在 JDK 17 上也能构建。
+              ${lombok.version} 由 spring-boot-dependencies 提供。
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
             </plugin>
 
             <!--

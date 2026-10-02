@@ -5,6 +5,9 @@ server:
 spring:
   application:
     name: spring-ai-mcp-server-image
+  config:
+    import:
+      - optional:classpath:.env[.properties]
   ai:
     mcp:
       server:
@@ -24,10 +27,18 @@ spring:
       api-key: ai-agent-learning
       image:
         # 生图模型（如 dall-e-3 / gpt-image-1，或兼容接口提供的模型名）
-        model: gpt-image-2
-
-
+        model: ${IMAGE_MODEL}
+        base-url: ${IMAGE_BASE_URL}
+        api-key: ${IMAGE_API_KEY}
+        response-format: b64_json
+        timeout: 120s
 logging:
   level:
     io.modelcontextprotocol: INFO
     org.springframework.ai.mcp: DEBUG
+minio:
+  config:
+    url: http://server.local.com:9000
+    username: siloadmin
+    password: lwhlx20031007.
+    bucket-name: image-ai
