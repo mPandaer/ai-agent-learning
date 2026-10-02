@@ -1,0 +1,33 @@
+server:
+  # 与 spring-ai（8080）、spring-ai-mcp-server（8081）错开，方便三个模块同时运行
+  port: 8082
+
+spring:
+  application:
+    name: spring-ai-mcp-server-image
+  ai:
+    mcp:
+      server:
+        enabled: true
+        name: spring-ai-mcp-server-image
+        version: 1.0.0
+        instructions: "学习用生图 MCP Server：提供基于 OpenAI 生图模型的图片生成工具。"
+        type: SYNC
+        protocol: STREAMABLE
+        streamable-http:
+          mcp-endpoint: /mcp
+        # 生图耗时较长，超时给宽一点
+        request-timeout: 120s
+    openai:
+      # 默认指向 OpenAI 官方，可改为任意 OpenAI 兼容接口
+      base-url: http://server.local.com:8317/v1
+      api-key: ai-agent-learning
+      image:
+        # 生图模型（如 dall-e-3 / gpt-image-1，或兼容接口提供的模型名）
+        model: gpt-image-2
+
+
+logging:
+  level:
+    io.modelcontextprotocol: INFO
+    org.springframework.ai.mcp: DEBUG

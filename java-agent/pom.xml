@@ -21,6 +21,7 @@
     <modules>
         <module>spring-ai</module>
         <module>spring-ai-mcp-server</module>
+        <module>spring-ai-mcp-server-image</module>
         <!-- 后续按需追加：<module>spring-ai-alibaba</module> -->
     </modules>
 
