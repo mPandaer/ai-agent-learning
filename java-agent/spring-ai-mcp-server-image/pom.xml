@@ -84,18 +84,6 @@
         </dependency>
 
         <!--
-          OpenAI 模型客户端：本模块用它调用生图接口。
-          spring-ai-starter-model-openai -> spring-ai-openai（OpenAiImageModel / OpenAiImageOptions）
-          + spring-ai-autoconfigure-model-openai（OpenAiImageAutoConfiguration，
-          自动装配 ImageModel Bean，配置前缀 spring.ai.openai.image）。
-          同样适用于任何 OpenAI 兼容的绘图接口。
-        -->
-        <dependency>
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-starter-model-openai</artifactId>
-        </dependency>
-
-        <!--
           Spring AI 核心抽象：
           - spring-ai-model 提供 @Tool / @ToolParam 等工具注解（编写 MCP Tool 时需要）
           - spring-ai-client-chat 提供上层 API（当前阶段不强依赖，保留便于后续扩展）
@@ -105,11 +93,6 @@
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-model</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-client-chat</artifactId>
-        </dependency>
-
         <!-- 显式声明：本模块自带 REST 端点，用于本地自检 MCP Server 状态 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -128,6 +111,12 @@
             <version>${minio.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.openai</groupId>
+            <artifactId>openai-java</artifactId>
+            <version>4.76.0</version>
+        </dependency>
+
         <!-- Lombok：版本由 Spring Boot BOM 管理 -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -140,6 +129,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.networknt</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>3.0.7</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

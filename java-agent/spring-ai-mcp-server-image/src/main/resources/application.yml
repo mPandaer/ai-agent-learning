@@ -42,3 +42,9 @@ minio:
     username: siloadmin
     password: lwhlx20031007.
     bucket-name: image-ai
+openai:
+  images:
+    providers:
+      - api-key: ${IMAGE_API_KEY}
+        base-url: ${IMAGE_BASE_URL}
+        model: ${IMAGE_MODEL}

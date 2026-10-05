@@ -1,4 +1,4 @@
-package com.learning.agent.mcp.image.dto;
+package com.learning.agent.mcp.image.dto.minio;
 
 
 import lombok.Builder;
@@ -8,7 +8,7 @@ import java.io.InputStream;
 
 @Builder
 @Data
-public class MinioUploadRequestDTO {
+public class UploadRequest {
 
     private String objectName;
 

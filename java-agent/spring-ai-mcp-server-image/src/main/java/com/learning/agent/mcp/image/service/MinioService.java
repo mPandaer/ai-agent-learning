@@ -2,8 +2,8 @@ package com.learning.agent.mcp.image.service;
 
 
 import com.learning.agent.mcp.image.config.minio.MinioConfigProperties;
-import com.learning.agent.mcp.image.dto.MinioUploadRequestDTO;
-import com.learning.agent.mcp.image.dto.MinioUploadResponseDTO;
+import com.learning.agent.mcp.image.dto.minio.UploadRequest;
+import com.learning.agent.mcp.image.dto.minio.UploadResponse;
 import io.minio.*;
 import io.minio.errors.MinioException;
 import io.minio.http.Method;
@@ -30,7 +30,7 @@ public class MinioService {
     private static final Long DEFAULT_PART_SIZE = 10485760L;
 
 
-    public MinioUploadResponseDTO upload(MinioUploadRequestDTO uploadDTO) {
+    public UploadResponse upload(UploadRequest uploadDTO) {
         PutObjectArgs args = PutObjectArgs.builder()
                 .bucket(minioConfigProperties.getBucketName())
                 .contentType(uploadDTO.getMediaType())
@@ -41,7 +41,7 @@ public class MinioService {
         try {
             ObjectWriteResponse response = minioClient.putObject(args);
             String url = getObjectUrl(response.object(), 6);
-            return new MinioUploadResponseDTO(response.object(),url,6);
+            return new UploadResponse(response.object(),url,6);
         } catch (MinioException | InvalidKeyException | IOException | NoSuchAlgorithmException e) {
             log.error("上传失败", e);
         }

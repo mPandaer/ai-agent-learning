@@ -1,0 +1,74 @@
+package com.learning.agent.mcp.image.client;
+
+import com.learning.agent.mcp.image.dto.image.Text2ImageRequest;
+import com.learning.agent.mcp.image.dto.image.Text2ImageResponse;
+import com.learning.agent.mcp.image.dto.minio.UploadRequest;
+import com.learning.agent.mcp.image.dto.minio.UploadResponse;
+import com.learning.agent.mcp.image.entity.BlobImage;
+import com.learning.agent.mcp.image.service.MinioService;
+import com.openai.client.OpenAIClient;
+import com.openai.models.images.Image;
+import com.openai.models.images.ImageGenerateParams;
+import com.openai.models.images.ImagesResponse;
+import lombok.Builder;
+import lombok.Getter;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+@Getter
+@Builder
+public class ImageClient {
+
+    private String name;
+
+    private OpenAIClient client;
+
+    private MinioService minioService;
+
+    private Integer order;
+
+    private String model;
+
+    private static final String MEDIA_TYPE = "image/png";
+
+    public Text2ImageResponse text2Image(Text2ImageRequest request) {
+        String prompt = request.getPrompt();
+        ImageGenerateParams params = ImageGenerateParams.builder()
+                .prompt(prompt)
+                .model(model)
+                .build();
+
+        ImagesResponse generate = client.images().generate(params);
+        List<Image> images = generate.data().orElse(null);
+        if (images == null || images.isEmpty()) {
+            return Text2ImageResponse.fail("模型提供商没有返回图片");
+        }
+
+        Image image = images.get(0);
+        String b64Image = image.b64Json().orElse(null);
+        if (b64Image == null || b64Image.isEmpty()) {
+            return Text2ImageResponse.fail("base64数据不存在");
+        }
+
+
+        BlobImage blobImage = BlobImage.decodeB64(b64Image);
+        UploadRequest uploadRequest = UploadRequest.builder()
+                .mediaType(MEDIA_TYPE)
+                .objectName(blobImage.getImageName())
+                .inputStream(blobImage.getInputStream())
+                .build();
+        UploadResponse upload = minioService.upload(uploadRequest);
+
+        if (upload == null) {
+            return Text2ImageResponse.fail("生成可访问的URL失败");
+        }
+        return Text2ImageResponse.success(upload.getUrl(),upload.getUrlExpireHours(), TimeUnit.HOURS);
+    }
+
+
+    public void image2Image() {
+
+    }
+
+
+}
