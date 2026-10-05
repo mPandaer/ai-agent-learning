@@ -2,6 +2,8 @@ package com.learning.agent.mcp.image.service;
 
 import com.learning.agent.mcp.image.client.ImageClient;
 import com.learning.agent.mcp.image.client.ImageClientManager;
+import com.learning.agent.mcp.image.dto.image.Image2ImageRequest;
+import com.learning.agent.mcp.image.dto.image.Image2ImageResponse;
 import com.learning.agent.mcp.image.dto.image.Text2ImageRequest;
 import com.learning.agent.mcp.image.dto.image.Text2ImageResponse;
 import com.learning.agent.mcp.image.dto.minio.UploadRequest;
@@ -34,6 +36,11 @@ public class GenImageService {
         Text2ImageRequest text2ImageRequest = new Text2ImageRequest();
         text2ImageRequest.setPrompt(prompt);
         return imageClient.text2Image(text2ImageRequest);
+    }
+
+    public Image2ImageResponse image2Image(Image2ImageRequest request) {
+        ImageClient imageClient = imageClientManager.getImageClient();
+        return imageClient.image2Image(request);
     }
 
 }
