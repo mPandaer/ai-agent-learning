@@ -9,6 +9,7 @@ import com.learning.agent.mcp.image.dto.minio.UploadResponse;
 import com.learning.agent.mcp.image.entity.BlobImage;
 import com.learning.agent.mcp.image.service.MinioService;
 import com.openai.client.OpenAIClient;
+import com.openai.core.MultipartField;
 import com.openai.models.images.Image;
 import com.openai.models.images.ImageEditParams;
 import com.openai.models.images.ImageGenerateParams;
@@ -73,7 +74,7 @@ public class ImageClient {
         if (upload == null) {
             return Text2ImageResponse.fail("生成可访问的URL失败");
         }
-        return Text2ImageResponse.success(upload.getUrl(),upload.getUrlExpireHours(), TimeUnit.HOURS);
+        return Text2ImageResponse.success(upload.getUrl(), upload.getUrlExpireHours(), TimeUnit.HOURS);
     }
 
 
@@ -83,9 +84,16 @@ public class ImageClient {
 
 
         try(InputStream inputStream = fetchImageUrl(imageUrl)) {
+            MultipartField<ImageEditParams.Image> paramsImage = MultipartField.<ImageEditParams.Image>builder()
+                    .value(ImageEditParams.Image.ofInputStream(inputStream))
+                    .contentType("image/png")
+                    .filename("input.png")
+                    .build();
+
             ImageEditParams params = ImageEditParams.builder()
-                    .image(inputStream)
+                    .image(paramsImage)
                     .prompt(prompt)
+                    .model(model)
                     .build();
             ImagesResponse edit = client.images().edit(params);
 

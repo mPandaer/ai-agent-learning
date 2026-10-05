@@ -48,7 +48,7 @@ public class MinioService {
         return null;
     }
 
-    private String getObjectUrl(String objectName,Integer expireHours) {
+    public String getObjectUrl(String objectName,Integer expireHours) {
         GetPresignedObjectUrlArgs arg = GetPresignedObjectUrlArgs.builder()
                 .method(Method.GET)
                 .bucket(minioConfigProperties.getBucketName())

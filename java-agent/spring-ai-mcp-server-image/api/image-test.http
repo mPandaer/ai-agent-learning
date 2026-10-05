@@ -1,0 +1,7 @@
+POST http://localhost:8082/image2image
+Content-Type: application/json
+
+{
+  "prompt": "衣服保守一点,不要暴露，中式风格",
+  "imageUrl": "http://server.local.com:9000/image-ai/3858574b543010834c6f4b14b9ab8eac4dcd4e9e6a3d42380f191988c89a1747.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=siloadmin%2F20261005%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20261005T145454Z&X-Amz-Expires=43200&X-Amz-SignedHeaders=host&X-Amz-Signature=d00e15a5ac511affbcbab22d5dcf68f2002efc71c5ec880098619666895e5626"
+}

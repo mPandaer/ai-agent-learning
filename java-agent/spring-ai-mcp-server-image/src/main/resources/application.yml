@@ -48,3 +48,4 @@ openai:
       - api-key: ${IMAGE_API_KEY}
         base-url: ${IMAGE_BASE_URL}
         model: ${IMAGE_MODEL}
+        name: gpt-image
