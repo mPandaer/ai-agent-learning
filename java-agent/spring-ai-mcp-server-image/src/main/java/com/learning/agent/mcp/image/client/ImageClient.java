@@ -10,6 +10,7 @@ import com.learning.agent.mcp.image.entity.BlobImage;
 import com.learning.agent.mcp.image.service.MinioService;
 import com.openai.client.OpenAIClient;
 import com.openai.core.MultipartField;
+import com.openai.models.audio.translations.TranslationCreateParams;
 import com.openai.models.images.Image;
 import com.openai.models.images.ImageEditParams;
 import com.openai.models.images.ImageGenerateParams;
@@ -48,6 +49,7 @@ public class ImageClient {
         ImageGenerateParams params = ImageGenerateParams.builder()
                 .prompt(prompt)
                 .model(model)
+                .responseFormat(ImageGenerateParams.ResponseFormat.B64_JSON)
                 .build();
 
         ImagesResponse generate = client.images().generate(params);
