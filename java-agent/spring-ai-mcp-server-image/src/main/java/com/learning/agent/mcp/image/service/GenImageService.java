@@ -2,10 +2,7 @@ package com.learning.agent.mcp.image.service;
 
 import com.learning.agent.mcp.image.client.ImageClient;
 import com.learning.agent.mcp.image.client.ImageClientManager;
-import com.learning.agent.mcp.image.dto.image.Image2ImageRequest;
-import com.learning.agent.mcp.image.dto.image.Image2ImageResponse;
-import com.learning.agent.mcp.image.dto.image.Text2ImageRequest;
-import com.learning.agent.mcp.image.dto.image.Text2ImageResponse;
+import com.learning.agent.mcp.image.dto.image.*;
 import com.learning.agent.mcp.image.dto.minio.UploadRequest;
 import com.learning.agent.mcp.image.dto.minio.UploadResponse;
 import org.springframework.ai.image.ImageGeneration;
@@ -19,6 +16,9 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;

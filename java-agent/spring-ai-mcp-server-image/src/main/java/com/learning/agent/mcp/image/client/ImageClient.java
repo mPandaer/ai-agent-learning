@@ -1,9 +1,6 @@
 package com.learning.agent.mcp.image.client;
 
-import com.learning.agent.mcp.image.dto.image.Image2ImageRequest;
-import com.learning.agent.mcp.image.dto.image.Image2ImageResponse;
-import com.learning.agent.mcp.image.dto.image.Text2ImageRequest;
-import com.learning.agent.mcp.image.dto.image.Text2ImageResponse;
+import com.learning.agent.mcp.image.dto.image.*;
 import com.learning.agent.mcp.image.dto.minio.UploadRequest;
 import com.learning.agent.mcp.image.dto.minio.UploadResponse;
 import com.learning.agent.mcp.image.entity.BlobImage;
@@ -17,15 +14,23 @@ import com.openai.models.images.ImageGenerateParams;
 import com.openai.models.images.ImagesResponse;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.client.RestClient;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Getter
 @Builder
 public class ImageClient {
@@ -96,6 +101,7 @@ public class ImageClient {
                     .image(paramsImage)
                     .prompt(prompt)
                     .model(model)
+                    .responseFormat(ImageEditParams.ResponseFormat.B64_JSON)
                     .build();
             ImagesResponse edit = client.images().edit(params);
 

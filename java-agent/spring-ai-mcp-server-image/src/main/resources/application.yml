@@ -32,6 +32,10 @@ spring:
         api-key: ${IMAGE_API_KEY}
         response-format: b64_json
         timeout: 120s
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
 logging:
   level:
     io.modelcontextprotocol: INFO
@@ -49,3 +53,6 @@ openai:
         base-url: ${IMAGE_BASE_URL}
         model: ${IMAGE_MODEL}
         name: gpt-image
+upload:
+  images:
+    base-url: http://server.local.com:${server.port}
