@@ -55,4 +55,4 @@ openai:
         name: gpt-image
 upload:
   images:
-    base-url: http://server.local.com:${server.port}
+    base-url: http://127.0.0.1:${server.port}

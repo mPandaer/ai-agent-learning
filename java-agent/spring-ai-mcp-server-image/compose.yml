@@ -1,0 +1,28 @@
+services:
+  image-mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: spring-ai-mcp-server-image:local
+    restart: unless-stopped
+    init: true
+    ports:
+      - "8082:8082"
+    environment:
+      # 仅加载挂载的配置，不依赖 JAR 内的配置文件。
+      SPRING_CONFIG_LOCATION: "file:/app/config/application.yml"
+      # 覆盖 application.yml 中的 classpath 导入，读取挂载的 .env。
+      # 这里是 Spring 的 properties 文件导入，不是 Compose 的 env_file。
+      SPRING_CONFIG_IMPORT: "file:/app/config/.env[.properties]"
+    volumes:
+      # 挂载整个目录，兼容编辑器以“替换文件”的方式保存配置。
+      # 宿主机可以修改；容器内只读。
+      - type: bind
+        source: ./src/main/resources
+        target: /app/config
+        read_only: true
+        bind:
+          create_host_path: false
+    extra_hosts:
+      # 如需访问宿主机上的服务，配置地址可用 host.docker.internal。
+      - "host.docker.internal:host-gateway"

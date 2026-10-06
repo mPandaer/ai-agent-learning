@@ -31,13 +31,15 @@ public class GenImageService {
     private ImageClientManager imageClientManager;
 
 
-    public Text2ImageResponse text2Image(String prompt) {
+    @McpTool(description = "用自然语言生成图片并返回一个可访问图片的URL地址")
+    public Text2ImageResponse text2Image(@McpToolParam(description = "一段自然语言") String prompt) {
         ImageClient imageClient = imageClientManager.getImageClient();
         Text2ImageRequest text2ImageRequest = new Text2ImageRequest();
         text2ImageRequest.setPrompt(prompt);
         return imageClient.text2Image(text2ImageRequest);
     }
 
+    @McpTool(description = "根据参考图片 URL 和文字编辑指令修改图片，返回编辑后图片的访问 URL。适用于替换背景、调整风格、添加或移除画面元素等场景。")
     public Image2ImageResponse image2Image(Image2ImageRequest request) {
         ImageClient imageClient = imageClientManager.getImageClient();
         return imageClient.image2Image(request);

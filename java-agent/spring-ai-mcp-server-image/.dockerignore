@@ -1,0 +1,14 @@
+.git
+.idea
+.DS_Store
+**/.DS_Store
+target
+**/target
+.env
+.env.*
+**/.env
+**/.env.*
+# 运行时挂载，不把配置或凭证打进镜像。
+src/main/resources/application*.yml
+src/main/resources/application*.yaml
+src/main/resources/application*.properties
