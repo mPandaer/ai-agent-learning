@@ -10,5 +10,6 @@ public class AssemblyVsSubscription {
 
         System.out.println("组装完成");
         flow.subscribe();
+        flow.subscribe();
     }
 }

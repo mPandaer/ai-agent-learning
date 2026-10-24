@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>第二课：订阅之后，数据为什么还没来？</title>
+<link rel="stylesheet" href="../assets/course.css">
+<script src="../assets/activities.js" defer></script>
+</head>
+<body><main class="page">
+<header><div class="eyebrow">Project Reactor · Lesson 02 · 7 min</div>
+<h1>订阅之后，<br>数据为什么还没来？</h1>
+<p class="dek">本课目标：预测一次订阅中的信号顺序，并用 request(n) 控制接收数量。</p></header>
+<p>为了读懂 Reactor 的底层调用过程，这一课先追踪一个最小同步源。你已经能区分“重新执行源”和“重放历史”；现在观察另一件事：订阅关系建立后，下游如何告诉上游自己需要多少数据。</p>
+<h2>先凭记忆回答</h2>
+<p>一个温度源保存了上次测量结果，新订阅者直接拿到它，没有重新测量。这是重新执行，还是重放？先说出理由，再展开。</p>
+<details><summary>核对</summary><p>这是重放：订阅没有触发新的测量。能收到历史数据，不能单独作为判断 cold 的依据。</p></details>
+<h2>先建立关系，再表达需求</h2>
+<pre>Subscriber ── subscribe ──▶ Publisher
+Subscriber ◀─ onSubscribe(subscription) ── Publisher
+Subscriber ── request(2) ──▶ Publisher
+Subscriber ◀─ onNext(1) ──── Publisher
+Subscriber ◀─ onNext(2) ──── Publisher
+                  暂停：剩余需求为 0
+Subscriber ── request(1) ──▶ Publisher
+Subscriber ◀─ onNext(3) ──── Publisher
+Subscriber ◀─ onComplete ── Publisher</pre>
+<p><code>onSubscribe</code> 把 <code>Subscription</code> 交给订阅者。订阅者通过它调用 <code>request(n)</code>：增加 n 个元素的接收额度。每收到一个 <code>onNext</code>，额度消耗一个；多次请求可以累加。源可以少发，也可以稍后再发，但不能超出已请求的数量。<a href="https://github.com/reactive-streams/reactive-streams-jvm#1-publisher-code">[规范 §1.1、§1.9]</a></p>
+<div class="note"><b>本课限定：</b>使用没有额外预取操作符的 <code>Flux.range(1, 3)</code>，它按需求同步供数。Hot 源中的外部事件仍可能发生，但向每个订阅者发送的 <code>onNext</code> 也必须遵守需求；缓存或丢弃等行为由具体实现决定。</div>
+<h2>动手：先订阅，别急着请求</h2>
+<p>依次点击“建立订阅”“请求两项”“请求一项”。每次点击前，预测会多出哪些日志。再重置，试试请求三次一项。</p>
+<div class="activity" data-demand-demo>
+<div class="controls"><button data-action="subscribe">建立订阅</button><button data-request="2">请求两项</button><button data-request="1">请求一项</button><button data-action="reset">重置演示</button></div>
+<p role="status" aria-live="polite"></p><pre aria-label="信号日志" aria-live="polite"></pre>
+<p class="small">这是上述同步 range 示例的教学模型。它没有引入线程、网络或额外预取。</p>
+</div>
+<h2>在 Java 中观察同一过程</h2>
+<p>普通的 <code>subscribe(value -&gt; ...)</code> 默认请求 <code>Long.MAX_VALUE</code>，表示不限制需求，因此第一课里看不到“等待请求”的阶段。这里用 <code>BaseSubscriber</code> 覆盖默认行为。<a href="https://projectreactor.io/docs/core/release/reference/coreFeatures/subscribe-backpressure.html">[官方：请求与背压]</a></p>
+<pre>BaseSubscriber&lt;Integer&gt; learner = new BaseSubscriber&lt;&gt;() {
+    @Override
+    protected void hookOnSubscribe(Subscription s) {
+        System.out.println("onSubscribe：已建立订阅，暂不请求");
+        // 故意不调用 request，改由下面的代码请求。
+    }
+
+    @Override
+    protected void hookOnNext(Integer value) {
+        System.out.println("onNext " + value);
+    }
+
+    @Override
+    protected void hookOnComplete() {
+        System.out.println("onComplete");
+    }
+};
+
+Flux.range(1, 3)
+    .doOnRequest(n -&gt; System.out.println("request " + n))
+    .subscribe(learner);
+
+learner.request(2); // 同步收到 1、2，然后返回。
+learner.request(1); // 同步收到 3、完成，然后返回。</pre>
+<p><code>BaseSubscriber</code> 保存了订阅句柄，所以这里可以从外部调用它的 <code>request</code>。省略请求是为了观察暂停；实际使用时需要确保最终提供需求。<a href="https://projectreactor.io/docs/core/release/reference/coreFeatures/simple-ways-to-create-a-flux-or-mono-and-subscribe-to-it.html">[官方：BaseSubscriber]</a></p>
+<p>完整代码含导入和错误回调：<a href="../../src/main/java/com/learning/reactor/lesson02/RequestDrivesSignals.java">RequestDrivesSignals.java</a>。在 IDE 中运行它的 <code>main</code>，重点观察“subscribe 已返回”和两次 request 之间的日志。</p>
+<details><summary>先预测，再看完整程序输出</summary><pre>调用 subscribe
+onSubscribe：已建立订阅，暂不请求
+subscribe 已返回，尚未收到元素
+request 2
+onNext 1
+onNext 2
+第一次 request 已返回
+request 1
+onNext 3
+onComplete</pre></details>
+<h2>一个容易漏掉的区别</h2>
+<p>需求额度只约束 <code>onNext</code>。<code>onComplete</code> 和 <code>onError</code> 不消耗额度：空源可以直接完成，发生错误也不需要先等到请求。完成与错误是两种终止方式；终止后，不再发送后续信号。<a href="https://github.com/reactive-streams/reactive-streams-jvm#1-publisher-code">[规范 §1.2、§1.7]</a></p>
+<div class="activity" data-quiz data-explanation="正确。先收到两个元素，需求耗尽，range 还剩一个元素，所以等待下一次请求。">
+<b>预测一：range(1, 3) 只请求两项，会怎样？</b>
+<div class="controls"><button data-correct="false">收到三项，然后完成</button><button data-correct="true">收到两项，然后等待</button><button data-correct="false">收到两项，然后报错</button></div>
+<p role="status" aria-live="polite"></p></div>
+<div class="activity" data-quiz data-explanation="正确。第三项恰好消耗最后一个额度，但 onComplete 不占额度，不必再请求一次。本例会立刻完成。">
+<b>预测二：随后再请求一项，本例会怎样？</b>
+<div class="controls"><button data-correct="true">收到末项，然后完成</button><button data-correct="false">收到末项，然后等待</button><button data-correct="false">收到末项，然后报错</button></div>
+<p role="status" aria-live="polite"></p></div>
+<h2>带走一个判断方法</h2>
+<p>看到“订阅了但没数据”，先问：订阅关系建立了吗？下游发出需求了吗？源是否已经有数据可发？<code>request(n)</code> 表达接收额度，本身不负责切换线程，也不保证立即得到 n 个元素。</p>
+<p>主阅读：<a href="https://projectreactor.io/docs/core/release/reference/coreFeatures/subscribe-backpressure.html">Reactor 官方文档：On Backpressure and Ways to Reshape Requests</a>。这次只读开头关于 demand 与 BaseSubscriber 的部分即可。</p>
+<footer>哪里不清楚，随时问我。可以把你预测的 Java 输出发给我一起追踪。<br>
+<a href="0001-reactor-is-a-signal-protocol.html">← 第一课</a> · <a href="../reference/reactor-signal-model.html">信号速查表</a> · <a href="../MISSION.md">学习目标</a><br>下次复习时，先不看笔记，解释为什么 request(2) 后没有立刻 onComplete。</footer>
+</main></body></html>

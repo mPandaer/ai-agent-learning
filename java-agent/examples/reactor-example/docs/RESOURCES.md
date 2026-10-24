@@ -2,6 +2,11 @@
 
 ## Knowledge
 
+- [Reactor: 请求与背压](https://projectreactor.io/docs/core/release/reference/coreFeatures/subscribe-backpressure.html)
+  第二课主阅读：demand 的累加、默认无限请求和 BaseSubscriber 的需求控制。
+- [Reactor: Hot Versus Cold](https://projectreactor.io/docs/core/release/reference/advancedFeatures/reactor-hotCold.html)
+  冷热源的执行差异；结合 [Sinks](https://projectreactor.io/docs/core/release/reference/coreFeatures/sinks.html) 理解重放历史与重新执行的区别。
+
 - [Project Reactor Reference Guide](https://projectreactor.io/docs/core/release/reference/)
   Reactor Core 官方参考手册，覆盖响应式编程模型、operator、线程调度、背压、测试和调试；课程/API 行为的首要依据。
 - [Reactor Core source code](https://github.com/reactor/reactor-core)
