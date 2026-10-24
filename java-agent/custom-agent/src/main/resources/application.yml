@@ -1,0 +1,23 @@
+server:
+  # 与 spring-ai（8080）、spring-ai-mcp-server（8081）、spring-ai-mcp-server-image（8082）错开
+  port: 8083
+
+spring:
+  application:
+    name: custom-agent
+  servlet:
+    encoding:
+      charset: UTF-8
+      force-response: true
+  ai:
+    openai:
+      # 任意 OpenAI 兼容接口均可（如 DeepSeek: https://api.deepseek.com）
+      base-url: http://server.local.com:8317/v1
+      api-key: ai-agent-learning
+      chat:
+        model: deepseek-flash
+        reasoning-effort: none
+
+logging:
+  level:
+    com.learning.agent.custom: DEBUG

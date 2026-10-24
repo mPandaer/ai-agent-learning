@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+      与 spring-ai / spring-ai-mcp-server 同层级，独立选择 Spring Boot 基线，不继承父仓库 POM。
+      刻意保持 Boot 4.1.1 + Spring AI 2.0.1，与其他模块共用本地仓库缓存，方便对照学习。
+    -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.1.1</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.learning.agent</groupId>
+    <artifactId>custom-agent</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>custom-agent</name>
+    <description>手写 Agent 核心逻辑模块（仅依赖 Spring AI 基础能力）</description>
+
+    <properties>
+        <java.version>17</java.version>
+        <spring-ai.version>2.0.1</spring-ai.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!--
+          ===== 依赖边界：只允许 Spring AI 的基础积木 =====
+          本模块刻意不引入任何 Agent 框架（Spring AI Alibaba、spring-ai-agent-utils、
+          LangChain4j 等），Agent 的循环、工具编排、记忆策略全部自己写。
+        -->
+
+        <!--
+          spring-ai-model：最底层模型抽象
+          - ChatModel / ChatResponse / Prompt / Message
+          - ToolCallback / @Tool / @ToolParam / ToolCallbackProvider
+          - ChatMemory / MessageWindowChatMemory
+          - ToolCallingManager（只借用"执行工具"这一层，不借用它的循环）
+        -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-model</artifactId>
+        </dependency>
+
+        <!--
+          spring-ai-client-chat：ChatClient 上层 API
+          可作为对照组（ChatClient 内部已自带一次工具调用循环），
+          用来验证"自己写的循环"和"框架的循环"行为是否一致。
+        -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-client-chat</artifactId>
+        </dependency>
+
+        <!-- 模型接入：OpenAI 兼容协议（DeepSeek / Moonshot 等同样适用） -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-openai</artifactId>
+        </dependency>
+
+        <!-- 对外暴露 HTTP 端点，便于用 curl / http 文件调试 Agent -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Lombok：版本由 Spring Boot BOM 管理 -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- 测试 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- 版本与 repackage 执行由 spring-boot-starter-parent 统一提供 -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <!--
+              保险：模块自管依赖版本后，若版本调解选出了比传递依赖更低的版本，
+              这里会直接构建失败，而不是等到运行时才炸。
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.6.3</version>
+                <executions>
+                    <execution>
+                        <id>enforce-dependency-convergence</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireUpperBoundDeps/>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

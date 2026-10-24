@@ -22,6 +22,8 @@
         <module>spring-ai</module>
         <module>spring-ai-mcp-server</module>
         <module>spring-ai-mcp-server-image</module>
+        <!-- 只依赖 Spring AI 基础积木，自己实现 Agent 核心循环 -->
+        <module>custom-agent</module>
         <!-- 后续按需追加：<module>spring-ai-alibaba</module> -->
     </modules>
 
