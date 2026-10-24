@@ -1,11 +1,17 @@
 package com.learning.agent.custom.api;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.learning.agent.custom.core.ReactAgent;
+import com.learning.agent.custom.core.manager.ToolManager;
+import com.learning.agent.custom.tool.SearchTool;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
+import org.springframework.ai.tool.method.MethodToolCallbackProvider;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,26 +25,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/custom-agent")
 public class SelfCheckController {
 
-    private final ObjectProvider<ChatModel> chatModels;
+    @Autowired
+    private ChatModel chatModel;
 
-    private final ObjectProvider<ToolCallback> toolCallbacks;
-
-    public SelfCheckController(ObjectProvider<ChatModel> chatModels, ObjectProvider<ToolCallback> toolCallbacks) {
-        this.chatModels = chatModels;
-        this.toolCallbacks = toolCallbacks;
-    }
-
-    @GetMapping("/health")
-    public Map<String, Object> health() {
-        ChatModel chatModel = this.chatModels.getIfAvailable();
-        long toolCallbackCount = this.toolCallbacks.stream().count();
-
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("module", "custom-agent");
-        body.put("status", chatModel != null ? "READY" : "NO_CHAT_MODEL");
-        body.put("chatModel", chatModel != null ? chatModel.getClass().getSimpleName() : null);
-        body.put("toolCallbackBeans", toolCallbackCount);
-        body.put("note", "Agent 循环尚未实现，当前仅校验 Spring AI 基础积木装配");
-        return body;
+    @GetMapping("/run")
+    public String agentRun(String message) {
+        ToolManager toolManager = new ToolManager(Arrays.stream(MethodToolCallbackProvider.builder().toolObjects(new SearchTool()).build().getToolCallbacks()).toList());
+        ReactAgent agent = ReactAgent.builder().model(chatModel).toolManager(toolManager).build();
+        return agent.run(message).getResult().getOutput().getText();
     }
 }
