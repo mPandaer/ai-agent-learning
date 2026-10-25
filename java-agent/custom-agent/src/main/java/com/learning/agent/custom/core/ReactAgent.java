@@ -41,7 +41,7 @@ public class ReactAgent {
             currentRound++;
             if (currentRound > maxRounds) {
                 // 达到最大轮次，任务没有完成也需要停止
-                context.add(new AssistantMessage("当前任务已达到最大迭代轮次，强制停止"));
+                context.add(new UserMessage("当前任务已达到最大迭代轮次,请不要调用工具，直接回答"));
                 return model.call(new Prompt(context));
             }
 
